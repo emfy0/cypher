@@ -14,8 +14,8 @@ end
 
 file_data = File.read('task3', binmode: true)
 
-PASSWORD = 'qWOe6asZ57189936'.freeze
-PASSWORD_SIZE = 10.freeze
+PASSWORD = 'aiJCdXt73Xbh2FMb'.freeze
+PASSWORD_SIZE = 9.freeze
 
 SALT = file_data[0, 4].freeze
 ITERATIONS = file_data[7].unpack1('C').freeze
@@ -23,7 +23,7 @@ DATA_TO_DECRYPT = file_data[12..].freeze
 PASSWORD_ARRAY = PASSWORD.chars.freeze
 THREAD_NUMBER = `nproc`.to_i.freeze
 
-puts "Salt: #{SALT}, Iterations: #{ITERATIONS}, thread number: #{THREAD_NUMBER}"
+puts "Salt: #{SALT}, Iterations: #{ITERATIONS}, thread number: #{THREAD_NUMBER}, size: #{PASSWORD_SIZE}"
 
 work = PASSWORD_ARRAY.combination(PASSWORD_SIZE).to_a
 
@@ -31,10 +31,14 @@ total_work = work.size
 
 work.each_slice((total_work.to_f / THREAD_NUMBER).ceil).with_index do |slice, index|
   Process.fork do
+    slices_size = slice.size
+    current_slice = 0
+
     puts "Thread #{index} started"
-    puts "Slice size: #{slice.size}"
 
     slice.each do |key|
+      puts "Thread #{index} slices: #{current_slice}/#{slices_size}"
+
       key.permutation(PASSWORD_SIZE).each do |permutated_key|
         decrypted_data = decrypt_data(permutated_key.join)
 
@@ -43,6 +47,8 @@ work.each_slice((total_work.to_f / THREAD_NUMBER).ceil).with_index do |slice, in
           exit(0)
         end
       end
+
+      current_slice += 1
     end
   end
 end
