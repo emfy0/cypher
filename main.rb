@@ -31,14 +31,9 @@ total_work = work.size
 
 work.each_slice((total_work.to_f / THREAD_NUMBER).ceil).with_index do |slice, index|
   Process.fork do
-    slices_size = slice.size
-    current_slice = 0
-
     puts "Thread #{index} started"
 
     slice.each do |key|
-      puts "Thread #{index} slices: #{current_slice}/#{slices_size}"
-
       key.permutation(PASSWORD_SIZE).each do |permutated_key|
         decrypted_data = decrypt_data(permutated_key.join)
 
@@ -47,8 +42,6 @@ work.each_slice((total_work.to_f / THREAD_NUMBER).ceil).with_index do |slice, in
           exit(0)
         end
       end
-
-      current_slice += 1
     end
   end
 end
